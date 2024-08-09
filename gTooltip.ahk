@@ -1,5 +1,4 @@
 #Requires AutoHotkey v2
-
 class gToolTip {
     static Hwnds := [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
     static IsWin11 := (VerCompare(A_OSVersion, "10.0.22200") >= 0)
@@ -15,9 +14,9 @@ class gToolTip {
         CoordMode("Mouse", CurrCoordMode)
         
         if (gToolTip.Hwnds[WhichToolTip] = 0) {
-            this.Gui := CurrGui := Gui("-Caption +ToolWindow +AlwaysOnTop")
+            this.Gui := CurrGui := Gui("-Caption +ToolWindow +AlwaysOnTop +Border")
             CurrGui.BackColor := gToolTip.Options.BackColor
-            CurrGui.MarginX := 7, CurrGui.MarginY := 2
+            CurrGui.MarginX := gToolTip.IsWin11 ? 6 : 5, CurrGui.MarginY := gToolTip.IsWin11 ? 2 : 1
             CurrGui.xOffset := IsSet(X) ? 0 : 16, CurrGui.yOffset := IsSet(Y) ? 0 : 16
             CurrGui.WM_LBUTTONDOWN := (OnMessage(WM_LBUTTONDOWN := 0x0201, WM_LBUTTONDOWN_HANDLER))
             CurrGui.WM_RBUTTONDOWN := (OnMessage(WM_RBUTTONDOWN := 0x0204, WM_RBUTTONDOWN_HANDLER))
@@ -40,7 +39,7 @@ class gToolTip {
             CurrGui["Msg"].Value := Msg
             CurrGui["Msg"].Move(,, cWidth, cHeight)
         }
-        CurrGui.Show("x" ((IsSet(X) ? X : mX) + CurrGui.xOffset) " y" ((IsSet(Y) ? Y : mY) + CurrGui.yOffset) " w" (cWidth + (CurrGui.MarginX * 2)) " h" (cHeight + (CurrGui.MarginY * 3)))
+        CurrGui.Show("x" ((IsSet(X) ? X : mX) + CurrGui.xOffset - (gToolTip.IsWin11 ? 1 : 0)) " y" ((IsSet(Y) ? Y : mY) + CurrGui.yOffset - (gToolTip.IsWin11 ? 1 : 0)) " w" (cWidth + (CurrGui.MarginX * 2) + 1) " h" (cHeight + (CurrGui.MarginY * 2) + 1))
 
         WM_LBUTTONDOWN_HANDLER(wParam, lParma, Msg, Hwnd) {
             HwndMatch := gToolTip.Contains(gToolTip.Hwnds, Hwnd)
@@ -101,7 +100,7 @@ class gToolTip {
                 CurrGui.BackColor := gToolTip.Options.BackColor
                 CurrGui["Msg"].SetFont("c" gToolTip.Options.FontColor " s" gToolTip.Options.FontSize, gToolTip.Options.FontName)
                 CurrGui["Msg"].Move(,, cWidth, cHeight)
-                CurrGui.Move(,, cWidth + (CurrGui.MarginX * 2), cHeight + (CurrGui.MarginY * 3))
+                CurrGui.Show("w" (cWidth + (CurrGui.MarginX * 2) + 1) " h" (cHeight + (CurrGui.MarginY * 2) + 1))
             }
         }
     }
